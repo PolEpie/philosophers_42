@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/polepie/developpement/42/fdf-42",
+      "program": "/Users/polepie/developpement/42/fdf-42/build/Debug/outDebug"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+*.a
+*.o
+philo
+a.out
+core.*
+*.dSYM
+
+.DS_Store

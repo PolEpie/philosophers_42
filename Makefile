@@ -40,7 +40,7 @@ fclean:			localclean
 				@echo "Removed executable."
 
 test:			$(NAME)
-				./$(NAME) 4 10 3 2
+				./$(NAME) 4 410 200 200
 
 re:				fclean all
 

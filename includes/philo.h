@@ -37,6 +37,7 @@ typedef struct s_fork
 typedef struct s_philosopher
 {
 	int				id;
+	int				eaten_count;
 	t_status		status;
 	long long		time_act_start;
 	long long		time_act_end;

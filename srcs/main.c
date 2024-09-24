@@ -19,11 +19,12 @@ int	start_eat(t_philosopher *philosopher, unsigned long time)
 	
 	/* printf("left_fork->user_id:\t%d\t%d\n", philosopher->left_fork->user_id, philosopher->left_fork->id);
 	printf("right_fork->user_id:\t%d\t%d\n", philosopher->right_fork->user_id, philosopher->right_fork->id); */
-	
 	if (philosopher->left_fork->user_id != philosopher->id || philosopher->right_fork->user_id != philosopher->id)
 		return (1);
 	philo_gen = (t_philo *)philosopher->philo;
-	printf("%lld [%d] is eating\n", time - philo_gen->time_start, philosopher->id);
+	printf("%lld %d has taken a fork\n", time - philo_gen->time_start, philosopher->id);
+	printf("%lld %d has taken a fork\n", time - philo_gen->time_start, philosopher->id);
+	printf("%lld %d is eating\n", time - philo_gen->time_start, philosopher->id);
 	philosopher->status = EATING;
 	philosopher->time_act_start = time;
 	philosopher->time_act_end = time + philo_gen->time_to_eat;
@@ -35,10 +36,10 @@ int	start_thinking(t_philosopher *philosopher, unsigned long time)
 	t_philo			*philo_gen;
 	
 	philo_gen = (t_philo *)philosopher->philo;
-	printf("%lld [%d] is thinking\n", time - philo_gen->time_start, philosopher->id);
+	printf("%lld %d is thinking\n", time - philo_gen->time_start, philosopher->id);
 	philosopher->status = THINKING;
 	philosopher->time_act_start = time;
-	philosopher->time_act_end = 0;
+	philosopher->time_act_end = time + philo_gen->time_to_sleep;
 	return (0);
 }
 
@@ -53,11 +54,12 @@ int start_sleep(t_philosopher *philosopher, unsigned long time)
 	philosopher->right_fork->user_id = -1;
 	pthread_mutex_unlock(&philosopher->left_fork->mutex);
 	pthread_mutex_unlock(&philosopher->right_fork->mutex);
-	printf("%lld [%d] is sleeping\n", time - philo_gen->time_start, philosopher->id);
+	printf("%lld %d is sleeping\n", time - philo_gen->time_start, philosopher->id);
 	philosopher->status = SLEEPING;
 	philosopher->time_act_start = time;
 	philosopher->time_act_end = time + philo_gen->time_to_sleep;
 	philosopher->last_time_eat = time;
+	philosopher->eaten_count += 1;
 	return (0);
 }
 
@@ -67,7 +69,7 @@ void	kill_philosopher(t_philosopher *philosopher, unsigned long time)
 
 	philo_gen = (t_philo *)philosopher->philo;
 	philosopher->status = DEAD;
-	printf("%lld [%d] died\n", time - philo_gen->time_start, philosopher->id);
+	printf("%lld %d died\n", time - philo_gen->time_start, philosopher->id);
 }
 
 
@@ -79,7 +81,7 @@ long long	timestamp(void)
 	return ((t.tv_sec * 1000) + (t.tv_usec / 1000));
 }
 
-int	take_fork(t_philosopher *philosopher, int id_fork, unsigned long time, bool is_left)
+int	take_fork(t_philosopher *philosopher, int id_fork, bool is_left)
 {
 	t_philo			*philo_gen;
 	t_fork			*fork;
@@ -94,13 +96,6 @@ int	take_fork(t_philosopher *philosopher, int id_fork, unsigned long time, bool 
 		philosopher->left_fork = fork;
 	else
 		philosopher->right_fork = fork;
-	printf("%lld [%d] has taken a fork\n", time - philo_gen->time_start, philosopher->id);
-	if (is_left && philosopher->right_fork->user_id == -1)
-	{
-		pthread_mutex_lock(&philosopher->right_fork->mutex);
-		philosopher->right_fork->user_id = philosopher->id;
-		printf("%lld [%d] has taken a fork\n", time - philo_gen->time_start, philosopher->id);
-	}
 	return (0);
 }
 
@@ -116,31 +111,41 @@ void *philo_think(void *philo)
 	//printf("time_at: %ld\n", time.tv_usec);
 	philosopher = (t_philosopher *)philo;
 	philo_gen = (t_philo *)philosopher->philo;
-	//printf("%ld [%d] is thinking\n", time.tv_usec - philo_gen->time_start, philosopher->id);
+	//printf("%ld %d is thinking\n", time.tv_usec - philo_gen->time_start, philosopher->id);
 	while (1)
 	{
 		time = timestamp();
-
-
-		if (philosopher->status == THINKING)
+		if (time - philosopher->last_time_eat >= philo_gen->time_to_die || philosopher->eaten_count >= philo_gen->number_of_times_each_philosopher_must_eat)
 		{
-			/* if (philosopher->id == 2)
-			{
-				printf("left_fork->user_id:\t%d\t%d\n", philosopher->left_fork->user_id, philosopher->left_fork->id);
-				printf("right_fork->user_id:\t%d\t%d\n", philosopher->right_fork->user_id, philosopher->right_fork->id);
-			} */
-			//printf("$* [%d]\n", philosopher->id);
-			if (philosopher->left_fork->user_id == -1 && philosopher->right_fork->user_id == -1)
-			{
-				take_fork(philosopher, philosopher->left_fork->id, time, true);
-				take_fork(philosopher, philosopher->right_fork->id, time, false);
-				start_eat(philosopher, time);
-			}
+			//printf("P* %d\n", philosopher->id);
+			kill_philosopher(philosopher, time);
+			break;
 		}
-		else if (philosopher->time_act_end != 0 && time >= philosopher->time_act_end)
+		else if (philosopher->time_act_end == 0 || (philosopher->time_act_end != 0 && time >= philosopher->time_act_end))
 		{
-			//printf("& [%d]\n", philosopher->id);
-			if (philosopher->status == EATING)
+			if (philosopher->status == THINKING)
+			{
+				/* if (philosopher->id == 2)
+				{
+					printf("left_fork->user_id:\t%d\t%d\n", philosopher->left_fork->user_id, philosopher->left_fork->id);
+					printf("right_fork->user_id:\t%d\t%d\n", philosopher->right_fork->user_id, philosopher->right_fork->id);
+				} */
+				//printf("$* %d\n", philosopher->id);
+				if (philosopher->left_fork->user_id == -1 && philosopher->right_fork->user_id == -1)
+				{
+					if (take_fork(philosopher, philosopher->left_fork->id, true))
+						continue;
+					if (take_fork(philosopher, philosopher->right_fork->id, false))
+					{
+						philosopher->left_fork->user_id = -1;
+						pthread_mutex_unlock(&philosopher->left_fork->mutex);
+						continue;
+					}
+					start_eat(philosopher, time);
+				}
+			}
+			//printf("& %d\n", philosopher->id);
+			else if (philosopher->status == EATING)
 			{
 				start_sleep(philosopher, time);
 			}
@@ -148,12 +153,6 @@ void *philo_think(void *philo)
 			{
 				start_thinking(philosopher, time);
 			}
-		}
-		else if (time - philosopher->last_time_eat >= philo_gen->time_to_die)
-		{
-			//printf("P* [%d]\n", philosopher->id);
-			kill_philosopher(philosopher, time);
-			break;
 		}
 	}
 	return (NULL);
@@ -209,16 +208,23 @@ int	create_philosophers(t_philo *philo)
 		philosophers[i].id = i + 1;
 		philosophers[i].time_act_end = 0;
 		philosophers[i].last_time_eat = time;
+		philosophers[i].eaten_count = 0;
 		philosophers[i].philo = philo;
 		pthread_mutex_init(&philosophers[i].mutex, NULL);
 		/* printf("i: %d\n", i);
 		printf("left\t%d\n", i);
 		printf("right\t%d %d\n", i-1, philo->number_of_philosophers-1); */
-		if (i == 0)
+		if (i == 0) {
 			philosophers[i].right_fork = forks[philo->number_of_philosophers-1];
+			//printf("right_fork->user_id:\t%d\t%d\n", i, philo->number_of_philosophers-1);
+		}
 		else
+		{
 			philosophers[i].right_fork = forks[i-1];
+			//printf("right_fork->user_id:\t%d\t%d\n", i, i-1);
+		}
 		philosophers[i].left_fork = forks[i];
+		//printf("left_fork->user_id:\t%d\t%d\n", i, i);
 		if (philo->time_start == 0)
 			philo->time_start = time;
 		/* if (i == 0)

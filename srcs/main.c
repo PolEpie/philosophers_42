@@ -63,15 +63,26 @@ int start_sleep(t_philosopher *philosopher, unsigned long time)
 	return (0);
 }
 
-void	kill_philosopher(t_philosopher *philosopher, unsigned long time)
+void	kill_philosopher(t_philosopher *philosopher, t_philo *philo_gen, unsigned long time)
 {
-	t_philo	*philo_gen;
+	//int		i;
 
-	philo_gen = (t_philo *)philosopher->philo;
 	philosopher->status = DEAD;
+	philo_gen->game_over = true;
 	printf("%lld %d died\n", time - philo_gen->time_start, philosopher->id);
+/* 	i = 0;
+	while (i < philo_gen->number_of_philosophers)
+	{
+		pthread_mutex_destroy(&philo_gen->forks[i]->mutex);
+		free(philo_gen->forks[i]);
+		//pthread_detach(philo_gen->philosophers[i].thread);
+		i++;
+	}
+	free(philo_gen->forks);
+	free(philo_gen->philosophers);
+	free(philo_gen); */
+	//exit(0);
 }
-
 
 long long	timestamp(void)
 {
@@ -114,11 +125,13 @@ void *philo_think(void *philo)
 	//printf("%ld %d is thinking\n", time.tv_usec - philo_gen->time_start, philosopher->id);
 	while (1)
 	{
+		if (philo_gen->game_over)
+			break;
 		time = timestamp();
-		if (time - philosopher->last_time_eat >= philo_gen->time_to_die || philosopher->eaten_count >= philo_gen->number_of_times_each_philosopher_must_eat)
+		if (time - philosopher->last_time_eat >= philo_gen->time_to_die || (philo_gen->number_of_times_each_philosopher_must_eat != -1 && philosopher->eaten_count >= philo_gen->number_of_times_each_philosopher_must_eat))
 		{
 			//printf("P* %d\n", philosopher->id);
-			kill_philosopher(philosopher, time);
+			kill_philosopher(philosopher, philo_gen, time);
 			break;
 		}
 		else if (philosopher->time_act_end == 0 || (philosopher->time_act_end != 0 && time >= philosopher->time_act_end))
@@ -200,6 +213,7 @@ int	create_philosophers(t_philo *philo)
 		return (printf("Malloc failed\n"), 1);
 	i = 0;
 	philo->time_start = 0;
+	philo->game_over = false;
 	while (i < philo->number_of_philosophers)
 	{
 		time = timestamp();
@@ -236,15 +250,23 @@ int	create_philosophers(t_philo *philo)
 		pthread_create(&philosophers[i].thread, NULL, philo_think, &philosophers[i]);
 		i++;
 	}
+	philo->philosophers = philosophers;
 	//philosophers[0].right_fork = forks[philo->number_of_philosophers - 1];
-
 	i = 0;
 	while (i < philo->number_of_philosophers)
 	{
 		pthread_join(philosophers[i].thread, NULL);
 		i++;
 	}
-	philo->philosophers = philosophers;
+	i = 0;
+	while (i < philo->number_of_philosophers)
+	{
+		pthread_mutex_destroy(&forks[i]->mutex);
+		free(forks[i]);
+		i++;
+		//pthread_mutex_destroy(&philosophers[i].mutex);
+	}
+	free(forks);
 	return (0);
 }
 
@@ -266,6 +288,8 @@ int main(int argc, char **argv)
 	philo->time_to_sleep = ft_atoi(argv[4]);
 	if (argc == 6)
 		philo->number_of_times_each_philosopher_must_eat = ft_atoi(argv[5]);
+	else
+		philo->number_of_times_each_philosopher_must_eat = -1;
 	printf("number_of_philosophers: %d\n", philo->number_of_philosophers);
 	printf("time_to_die: %llu\n", philo->time_to_die);
 	printf("time_to_eat: %llu\n", philo->time_to_eat);

@@ -59,6 +59,7 @@ typedef struct s_philo
 	int				number_of_times_each_philosopher_must_eat;
 	t_philosopher	*philosophers;
 	t_fork			**forks;
+	bool			game_over;
 }	t_philo;
 
 int	ft_atoi(char *str);

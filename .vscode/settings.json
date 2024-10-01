@@ -55,16 +55,16 @@
   "C_Cpp_Runner.useLeakSanitizer": false,
   "C_Cpp_Runner.showCompilationTime": false,
   "C_Cpp_Runner.useLinkTimeOptimization": false,
-"C_Cpp_Runner.msvcSecureNoWarnings": false,
-"files.associations": {
-	"minishell.h": "c",
-	"libft.h": "c",
-	"libft_core.h": "c",
-	"printf.h": "c",
-	"ft_cat.h": "c",
-	"hashtable.h": "c",
-	"ft_printf.h": "c",
-	"philo.h": "c",
-	"stdlib.h": "c"
-}
+  "C_Cpp_Runner.msvcSecureNoWarnings": false,
+  "files.associations": {
+    "minishell.h": "c",
+    "libft.h": "c",
+    "libft_core.h": "c",
+    "printf.h": "c",
+    "ft_cat.h": "c",
+    "hashtable.h": "c",
+    "ft_printf.h": "c",
+    "philo.h": "c",
+    "stdlib.h": "c"
+  }
 }

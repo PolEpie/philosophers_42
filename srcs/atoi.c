@@ -31,12 +31,16 @@ int	ft_str_is_whitespace(char str)
 int	ft_atoi(char*str)
 {
 	int	num;
+	int	minus_count;
 
 	num = -1;
+    minus_count = 0;
 	while (ft_str_is_whitespace(*str))
 		str++;
 	if (*str == '-' || *str == '+')
 	{
+		if (*str == '-')
+			minus_count++;
 		str++;
 	}
 	while (ft_str_is_num(*str))
@@ -47,5 +51,7 @@ int	ft_atoi(char*str)
 		num = num + *str - '0';
 		str++;
 	}
+	if (minus_count % 2 == 1)
+		num = num * -1;
 	return (num);
 }

@@ -45,8 +45,11 @@ typedef struct s_philosopher
 	pthread_t		thread;
 	t_fork			*left_fork;
 	t_fork			*right_fork;
-	pthread_mutex_t	mutex;
+	pthread_mutex_t	dead;
+	pthread_mutex_t	write_mutex;
+	pthread_mutex_t	finish;
 	void 			*philo;
+	bool			game_over;
 }	t_philosopher;
 
 typedef struct s_philo
@@ -59,7 +62,12 @@ typedef struct s_philo
 	int				number_of_times_each_philosopher_must_eat;
 	t_philosopher	*philosophers;
 	t_fork			**forks;
+    pthread_mutex_t *philo_mutex;
+	pthread_t		*tid;
+	int				*num_eaten;
+	pthread_mutex_t	num_eaten_mutex;
 	bool			game_over;
+	pthread_mutex_t	game_over_mutex;
 }	t_philo;
 
 int	ft_atoi(char *str);

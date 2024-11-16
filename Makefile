@@ -4,7 +4,7 @@ CC			=	cc
 INCLUDE 	=	./includes/
 INCLUDE_LIBFT = $(addprefix $(LIBFT), includes/)
 
-CFLAGS		=	-Wall -Werror -Wextra -g -I$(INCLUDE)
+CFLAGS		=	-Wall -Werror -Wextra -g -I$(INCLUDE) -fsanitize=thread -pthread
 RM			=	rm -f
 OBJ_DIR		=	objs
 SRCS		=	./srcs/main.c \

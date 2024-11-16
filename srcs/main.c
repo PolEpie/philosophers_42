@@ -330,12 +330,14 @@ int	create_philosophers(t_philo *philo)
 	{
 		pthread_mutex_destroy(&philosophers[i].dead);
 		pthread_mutex_destroy(&philosophers[i].write_mutex);
-		pthread_mutex_destroy(&philosophers[i].finish);
 		pthread_mutex_destroy(&forks[i]->mutex);
 		free(forks[i]);
 		i++;
 	}
 	free(forks);
+	free(philo->num_eaten);
+	free(philo->tid);
+	free(philo->philo_mutex);
 	return (0);
 }
 

@@ -59,7 +59,7 @@ typedef struct s_philo
 	long long		time_to_eat;
 	int				time_to_sleep;
 	long long		time_start;
-	int				number_of_times_each_philosopher_must_eat;
+	int				num_eat_max;
 	t_philosopher	*philosophers;
 	t_fork			**forks;
     pthread_mutex_t *philo_mutex;

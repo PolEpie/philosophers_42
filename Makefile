@@ -8,7 +8,11 @@ CFLAGS		=	-Wall -Werror -Wextra -g -I$(INCLUDE) #-fsanitize=thread -pthread
 RM			=	rm -f
 OBJ_DIR		=	objs
 SRCS		=	./srcs/main.c \
+				./srcs/actions.c \
 				./srcs/atoi.c \
+				./srcs/init.c \
+				./srcs/routine.c \
+				./srcs/kill.c
 
 OBJS		=	$(SRCS:/%.c=%.o)
 

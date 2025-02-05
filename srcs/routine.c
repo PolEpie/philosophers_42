@@ -77,6 +77,7 @@ void	*philo_think(void *philo)
 
 	philosopher = (t_philosopher *)philo;
 	philo_gen = (t_philo *)philosopher->philo;
+	time = timestamp();
 	while (check_game_over(philo_gen))
 	{
 		if (philosopher->status == THINKING)

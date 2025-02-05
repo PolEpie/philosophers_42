@@ -12,7 +12,7 @@
 
 #include "philo.h"
 
-int	start_eat(t_philosopher *philosopher, unsigned long time)
+int	start_eat(t_philosopher *philosopher, t_ll time)
 {
 	t_philo			*philo_gen;
 
@@ -28,7 +28,7 @@ int	start_eat(t_philosopher *philosopher, unsigned long time)
 	return (0);
 }
 
-int	start_thinking(t_philosopher *philosopher, unsigned long time)
+void	start_thinking(t_philosopher *philosopher, t_ll time)
 {
 	t_philo			*philo_gen;
 
@@ -38,10 +38,10 @@ int	start_thinking(t_philosopher *philosopher, unsigned long time)
 	philosopher->status = THINKING;
 	philosopher->time_act_start = time;
 	philosopher->time_act_end = time;
-	return (0);
+	return ;
 }
 
-int	start_sleep(t_philosopher *philosopher, unsigned long time)
+void	start_sleep(t_philosopher *philosopher, t_ll time)
 {
 	t_philo			*philo_gen;
 
@@ -65,12 +65,41 @@ int	start_sleep(t_philosopher *philosopher, unsigned long time)
 	if (check_game_over(philo_gen))
 	{
 		kill_philosopher(philosopher, philo_gen, time, false);
-		return (0);
+		return ;
 	}
+	return ;
+}
+
+
+bool	try_take_fork2(t_philosopher *p, t_ll t, t_fork *f1, t_fork *f2)
+{
+	t_philo			*philo_gen;
+
+	philo_gen = (t_philo *)p->philo;
+	pthread_mutex_lock(&f1->mutex);
+	if (take_fork(p, f1))
+		return (pthread_mutex_unlock(&f1->mutex), 0);
+	pthread_mutex_unlock(&f1->mutex);
+	if (&p->left_fork->mutex == &p->right_fork->mutex)
+	{	
+		return (printf("%lld %d has taken a fork\n",
+				t - philo_gen->time_start, p->id), 0);
+	}
+	pthread_mutex_lock(&f2->mutex);
+	if (take_fork(p, f2))
+	{
+		pthread_mutex_lock(&f1->mutex);
+		f1->user_id = -1;
+		pthread_mutex_unlock(&f1->mutex);
+		return (pthread_mutex_unlock(&f2->mutex), 0);
+	}
+	pthread_mutex_unlock(&f2->mutex);
+	start_eat(p, t);
 	return (0);
 }
 
-bool	try_take_fork(t_philosopher	*phil, long long time)
+
+bool	try_take_fork(t_philosopher	*phil, t_ll time)
 {
 	t_fork			*first_fork;
 	t_fork			*second_fork;
@@ -85,31 +114,5 @@ bool	try_take_fork(t_philosopher	*phil, long long time)
 		first_fork = phil->right_fork;
 		second_fork = phil->left_fork;
 	}
-	try_take_fork2(phil, time, first_fork, second_fork);
-}
-
-bool	try_take_fork2(t_philosopher *p, long long t, t_fork *f1, t_fork *f2)
-{
-	t_philo			*philo_gen;
-
-	pthread_mutex_lock(&f1->mutex);
-	if (take_fork(p, f1))
-		return (pthread_mutex_unlock(&f1->mutex), 0);
-	pthread_mutex_unlock(&f1->mutex);
-	if (&p->left_fork->mutex == &p->right_fork->mutex)
-	{
-		return (printf("%lld %d has taken a fork\n",
-				time - philo_gen->time_start, p->id), 0);
-	}
-	pthread_mutex_lock(&f2->mutex);
-	if (take_fork(p, f2))
-	{
-		pthread_mutex_lock(&f1->mutex);
-		f1->user_id = -1;
-		pthread_mutex_unlock(&f1->mutex);
-		return (pthread_mutex_unlock(&f2->mutex), 0);
-	}
-	pthread_mutex_unlock(&f2->mutex);
-	start_eat(p, time);
-	return (0);
+	return (try_take_fork2(phil, time, first_fork, second_fork));
 }

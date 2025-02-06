@@ -68,6 +68,7 @@ typedef struct s_philo
 	pthread_mutex_t	num_eaten_mutex;
 	bool			game_over;
 	pthread_mutex_t	game_over_mutex;
+	pthread_mutex_t	write_mutex;
 }	t_philo;
 
 int	ft_atoi(char *str);

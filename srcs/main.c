@@ -90,6 +90,16 @@ long long	timestamp(void)
 	return ((t.tv_sec * 1000) + (t.tv_usec / 1000));
 }
 
+int	ft_usleep(int time)
+{
+	long long	start;
+
+	start = timestamp();
+	while ((timestamp() - start) < time)
+		usleep(time);
+	return (0);
+}
+
 void	print_philo(t_philosopher *philosopher, char *str)
 {
 	t_philo			*philo_gen;
@@ -113,6 +123,7 @@ int	start_eat(t_philosopher *philosopher, unsigned long time)
 	philosopher->time_act_start = time;
 	philosopher->time_act_end = time + philo_gen->time_to_eat;
 	philosopher->last_time_eat = time;
+	ft_usleep(philo_gen->time_to_eat);
 	return (0);
 }
 
@@ -121,10 +132,11 @@ int	start_thinking(t_philosopher *philosopher, unsigned long time)
 	t_philo			*philo_gen;
 	
 	philo_gen = (t_philo *)philosopher->philo;
-	printf("%lld %d is thinking\n", time - philo_gen->time_start, philosopher->id);
+	print_philo(philosopher, "is thinking");
 	philosopher->status = THINKING;
 	philosopher->time_act_start = time;
-	philosopher->time_act_end = time + philo_gen->time_to_eat - philo_gen->time_to_sleep;
+	philosopher->time_act_end = time + 1;
+	ft_usleep(1);
 	return (0);
 }
 
@@ -152,6 +164,7 @@ int start_sleep(t_philosopher *philosopher, unsigned long time)
 		kill_philosopher(philosopher, philo_gen, time, false);
 		return (0);
 	}
+	ft_usleep(philo_gen->time_to_sleep);
 	return (0);
 }
 
@@ -198,16 +211,6 @@ bool	try_take_fork(t_philosopher	*philosopher, long long time)
 	return (0);
 }
 
-int	ft_usleep(int time)
-{
-	long long	start;
-
-	start = timestamp();
-	while ((timestamp() - start) < time)
-		usleep(time / 10);
-	return (0);
-}
-
 void *philo_think(void *philo)
 {
 	long long	 	time;
@@ -216,25 +219,22 @@ void *philo_think(void *philo)
 
 	philosopher = (t_philosopher *)philo;
 	philo_gen = (t_philo *)philosopher->philo;
+	if (philosopher->id % 2 == 1)
+		ft_usleep(2);
 	while (true)
 	{
-		if (philosopher->id % 2 == 1)
-			usleep(100);
 		time = timestamp();
 		if (time - philosopher->last_time_eat >= philo_gen->time_to_die && philosopher->status != EATING) 
 		{
 			kill_philosopher(philosopher, philo_gen, time, true);
 			break;
 		}
-		else if (philosopher->time_act_end == 0 || (philosopher->time_act_end != 0 && time >= philosopher->time_act_end))
-		{
-			if (philosopher->status == THINKING)
-				try_take_fork(philosopher, time);
-			else if (philosopher->status == EATING)
-				start_sleep(philosopher, time);
-			else if (philosopher->status == SLEEPING)
-				start_thinking(philosopher, time);
-		}
+		if (philosopher->status == THINKING)
+			try_take_fork(philosopher, time);
+		else if (philosopher->status == EATING)
+			start_sleep(philosopher, time);
+		else if (philosopher->status == SLEEPING)
+			start_thinking(philosopher, time);
 		if (philosopher->game_over) {
 			break;
 		}
@@ -351,7 +351,6 @@ int	create_philosophers(t_philo *philo)
 	while (i < philo->number_of_philosophers)
 	{
 		pthread_mutex_destroy(&philosophers[i].dead);
-		pthread_mutex_destroy(&philosophers[i].write_mutex);
 		pthread_mutex_destroy(&forks[i]->mutex);
 		free(forks[i]);
 		i++;
@@ -380,6 +379,7 @@ int main(int argc, char **argv)
 	philo->time_to_die = ft_atoi(argv[2]);
 	philo->time_to_eat = ft_atoi(argv[3]);
 	philo->time_to_sleep = ft_atoi(argv[4]);
+	have_eat_max = false;
 	if (argc == 6)
 	{
 		philo->number_of_times_each_philosopher_must_eat = ft_atoi(argv[5]);
@@ -401,6 +401,10 @@ int main(int argc, char **argv)
 	}
 	create_philosophers(philo);
 	free(philo->philosophers);
+	pthread_mutex_destroy(&philo->write_mutex);
+	pthread_mutex_destroy(&philo->game_over_mutex);
+	pthread_mutex_destroy(&philo->num_eaten_mutex);
 	free(philo);
+
 	return (0);
 }

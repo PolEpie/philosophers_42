@@ -46,6 +46,8 @@ typedef struct s_philosopher
 	t_fork			*left_fork;
 	t_fork			*right_fork;
 	pthread_mutex_t	dead;
+	pthread_mutex_t	status_mutex;
+	pthread_mutex_t	timing_mutex;
 	pthread_mutex_t	write_mutex;
 	pthread_mutex_t	finish;
 	void 			*philo;

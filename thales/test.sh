@@ -167,7 +167,6 @@ test_helgrind () {
   else
     echo "${red}[-] Test #${test_num} Helgrind Test Failed: Race conditions detected${reset}"
   fi
-  rm -rf "./helgrind_$1.log"
 }
 
 test_valgrind_meals () {

@@ -166,9 +166,6 @@ int	start_eat(t_philosopher *philosopher, unsigned long time)
 
 int	start_thinking(t_philosopher *philosopher, unsigned long time)
 {
-	t_philo			*philo_gen;
-	
-	philo_gen = (t_philo *)philosopher->philo;
 	print_philo(philosopher, "is thinking");
 	
 	pthread_mutex_lock(&philosopher->status_mutex);

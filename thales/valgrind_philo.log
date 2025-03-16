@@ -1,56 +1,8 @@
-==2412011== Memcheck, a memory error detector
-==2412011== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
-==2412011== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
-==2412011== Command: ..//philo 199 610 200 200 10
-==2412011== 
-75 1 has taken a fork
-90 1 has taken a fork
-91 1 is eating
-198 3 has taken a fork
-199 3 has taken a fork
-199 3 is eating
-199 5 has taken a fork
-199 5 has taken a fork
-199 5 is eating
-389 7 has taken a fork
-389 7 has taken a fork
-389 7 is eating
-414 9 has taken a fork
-414 9 has taken a fork
-414 9 is eating
-416 5 is sleeping
-417 1 is sleeping
-417 11 has taken a fork
-417 11 has taken a fork
-417 11 is eating
-445 14 has taken a fork
-445 14 has taken a fork
-445 14 is eating
-657 23 has taken a fork
-657 23 has taken a fork
-657 23 is eating
-657 9 is sleeping
-657 14 is sleeping
-657 2 has taken a fork
-658 19 has taken a fork
-658 19 has taken a fork
-658 19 is eating
-658 2 has taken a fork
-659 1 is thinking
-660 13 has taken a fork
-660 13 has taken a fork
-660 13 is eating
-660 21 has taken a fork
-660 21 has taken a fork
-660 21 is eating
-660 3 is sleeping
-610 2 died
-==2412011== 
-==2412011== HEAP SUMMARY:
-==2412011==     in use at exit: 0 bytes in 0 blocks
-==2412011==   total heap usage: 406 allocs, 406 frees, 143,884 bytes allocated
-==2412011== 
-==2412011== All heap blocks were freed -- no leaks are possible
-==2412011== 
-==2412011== For lists of detected and suppressed errors, rerun with: -s
-==2412011== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==9372== Memcheck, a memory error detector
+==9372== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==9372== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==9372== Command: ..//philo 199 800 300 100 9
+==9372== 
+==9372== Warning: set address range perms: large range [0x7b0000000000, 0x7c0000003000) (noaccess)
+==9372== Warning: set address range perms: large range [0x8000000000, 0x10000000000) (noaccess)
+==9372== Warning: set address range perms: large range [0x200000000000, 0x300000000000) (noaccess)

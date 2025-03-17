@@ -1,8 +1,0 @@
-==9372== Memcheck, a memory error detector
-==9372== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
-==9372== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
-==9372== Command: ..//philo 199 800 300 100 9
-==9372== 
-==9372== Warning: set address range perms: large range [0x7b0000000000, 0x7c0000003000) (noaccess)
-==9372== Warning: set address range perms: large range [0x8000000000, 0x10000000000) (noaccess)
-==9372== Warning: set address range perms: large range [0x200000000000, 0x300000000000) (noaccess)

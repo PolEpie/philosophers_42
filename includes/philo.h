@@ -38,6 +38,7 @@ typedef struct s_philosopher
 {
 	int				id;
 	int				eaten_count;
+	int				time_think;
 	t_status		status;
 	long long		time_act_start;
 	long long		time_act_end;

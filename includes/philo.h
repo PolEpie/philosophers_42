@@ -18,6 +18,7 @@
 #include <pthread.h>
 #include <sys/time.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 typedef enum e_status
 {
@@ -39,20 +40,12 @@ typedef struct s_philosopher
 	int				id;
 	int				eaten_count;
 	int				time_think;
-	t_status		status;
-	long long		time_act_start;
-	long long		time_act_end;
 	long long		last_time_eat;
 	pthread_t		thread;
 	t_fork			*left_fork;
 	t_fork			*right_fork;
-	pthread_mutex_t	dead;
-	pthread_mutex_t	status_mutex;
-	pthread_mutex_t	timing_mutex;
-	pthread_mutex_t	write_mutex;
-	pthread_mutex_t	finish;
 	void 			*philo;
-	bool			game_over;
+	bool			is_eating;
 }	t_philosopher;
 
 typedef struct s_philo
@@ -65,15 +58,19 @@ typedef struct s_philo
 	int				number_of_times_each_philosopher_must_eat;
 	t_philosopher	*philosophers;
 	t_fork			**forks;
-    pthread_mutex_t *philo_mutex;
 	pthread_t		*tid;
-	int				*num_eaten;
-	pthread_mutex_t	num_eaten_mutex;
-	bool			game_over;
-	pthread_mutex_t	game_over_mutex;
 	pthread_mutex_t	write_mutex;
+	pthread_mutex_t	eating_mutex;
+	pthread_mutex_t	game_over_mutex;
+	bool			game_over;
 }	t_philo;
 
-int	ft_atoi(char *str);
+int			ft_atoi(char *str);
+void		*death_monitor(void *arg);
+void		*monitor_eat(void *arg);
+long long	timestamp(void);
+bool		check_dead(t_philo *philo);
+int			ft_usleep(int time, t_philo *philo);
+void		print_philo(t_philosopher *philosopher, char *str);
 
 #endif

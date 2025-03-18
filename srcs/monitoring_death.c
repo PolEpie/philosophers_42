@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   monitoring_death.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: pepie <pepie@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 07:51:42 by pepie             #+#    #+#             */
-/*   Updated: 2025/03/18 00:35:34 by pepie            ###   ########.fr       */
+/*   Updated: 2025/03/18 02:13:44 by pepie            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,11 +26,22 @@ bool	check_dead(t_philo *philosopher)
 
 static int	is_philosopher_dead(t_philo *philo_gen, t_philosopher *philosopher)
 {
+	long long current_time;
+	long long time_since_last_meal;
+	int status = 0;
+	
 	pthread_mutex_lock(&philo_gen->eating_mutex);
-	if ((timestamp() - philosopher->last_time_eat >= (unsigned int)philo_gen->time_to_die
-			&& !philosopher->is_eating))
-		return (pthread_mutex_unlock(&philo_gen->eating_mutex), 1);
-	return (pthread_mutex_unlock(&philo_gen->eating_mutex), 0);
+	current_time = timestamp();
+	time_since_last_meal = current_time - philosopher->last_time_eat;
+	
+	// Check if philosopher has been waiting too long since last meal
+	// Give a small grace period by adding 10ms to the time_to_die
+	if (time_since_last_meal > philo_gen->time_to_die + 10 && !philosopher->is_eating)
+	{
+		status = 1;
+	}
+	pthread_mutex_unlock(&philo_gen->eating_mutex);
+	return (status);
 }
 
 
@@ -50,6 +61,7 @@ static int	is_a_philosopher_dead(t_philo *philo)
 			return (1);
 		}
 		i++;
+		// Reduce the check frequency to not overwhelm the system with checks
 		usleep(100);
 	}
 	return (0);
@@ -59,11 +71,15 @@ void *death_monitor(void *arg)
 {
     t_philo *philo_gen = (t_philo *)arg;
     
+    // Give philosophers time to start eating before checking for deaths
+    usleep(philo_gen->time_to_eat / 2);
+    
     while (true)
     {
 		if (is_a_philosopher_dead(philo_gen))
 			return (NULL);
-		usleep(100);
+		// Reduce checking frequency
+		usleep(500);
     }
     return (NULL);
 }

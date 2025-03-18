@@ -76,7 +76,7 @@ void	destroy_threads(t_philo *philo, int count, t_fork **forks)
 	philo->game_over = true;
 	pthread_mutex_unlock(&philo->game_over_mutex);
 	while (++i < count)
-		pthread_join(philo->philosophers[i].thread, NULL);
+		pthread_join(philo->tid[i], NULL);
 	i = 0;
 	while (i < philo->number_of_philosophers)
 	{

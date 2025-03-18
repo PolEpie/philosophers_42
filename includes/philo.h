@@ -41,7 +41,6 @@ typedef struct s_philosopher
 	int				eaten_count;
 	int				time_think;
 	long long		last_time_eat;
-	pthread_t		thread;
 	t_fork			*left_fork;
 	t_fork			*right_fork;
 	void 			*philo;

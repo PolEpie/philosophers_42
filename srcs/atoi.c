@@ -34,7 +34,7 @@ int	ft_atoi(char*str)
 	int	minus_count;
 
 	num = -1;
-    minus_count = 0;
+	minus_count = 0;
 	while (ft_str_is_whitespace(*str))
 		str++;
 	if (*str == '-' || *str == '+')

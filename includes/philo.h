@@ -55,7 +55,7 @@ typedef struct s_philo
 	long long		time_to_eat;
 	int				time_to_sleep;
 	long long		time_start;
-	int				number_of_times_each_philosopher_must_eat;
+	int				num_must_eat;
 	t_philosopher	*philosophers;
 	t_fork			**forks;
 	pthread_t		*tid;
@@ -64,6 +64,8 @@ typedef struct s_philo
 	pthread_mutex_t	eating_mutex;
 	pthread_mutex_t	game_over_mutex;
 	bool			game_over;
+	pthread_t		death_monitor_thread;
+	pthread_t		eat_monitor_thread;
 }	t_philo;
 
 int			ft_atoi(char *str);
@@ -73,5 +75,12 @@ long long	timestamp(void);
 bool		check_dead(t_philo *philo);
 int			ft_usleep(int time, t_philo *philo);
 void		print_philo(t_philosopher *philosopher, char *str);
+void		*philo_think(void *philo);
+void		destroy_threads(t_philo *philo, int count, t_fork **forks);
+int			start_eat(t_philosopher *philosopher);
+int			start_thinking(t_philosopher *philosopher);
+int			start_sleep(t_philosopher *philosopher);
+void		try_take_fork(t_philosopher *philosopher);
+int			create_philosophers(t_philo *philo);
 
 #endif

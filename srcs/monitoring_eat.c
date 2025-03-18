@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   monitoring_eat.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: pepie <pepie@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/17 07:51:42 by pepie             #+#    #+#             */
-/*   Updated: 2025/03/18 00:35:34 by pepie            ###   ########.fr       */
+/*   Updated: 2025/03/18 02:55:35 by pepie            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,7 @@ static int	is_all_ate(t_philo *philo)
 	while (i < philo->number_of_philosophers)
 	{
 		pthread_mutex_lock(&philo->eating_mutex);
-		if (philo->philosophers[i].eaten_count < 
-			philo->number_of_times_each_philosopher_must_eat)
+		if (philo->philosophers[i].eaten_count < philo->num_must_eat)
 		{
 			pthread_mutex_unlock(&philo->eating_mutex);
 			return (0);
@@ -38,7 +37,7 @@ static int	is_all_ate(t_philo *philo)
 
 void	*monitor_eat(void *arg)
 {
-	t_philo	*philo;
+	t_philo		*philo;
 	long long	start;
 	long long	now;
 

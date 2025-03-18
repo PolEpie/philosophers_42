@@ -10,6 +10,8 @@ OBJ_DIR		=	objs
 SRCS		=	./srcs/main.c \
 				./srcs/monitoring_death.c \
 				./srcs/monitoring_eat.c \
+				./srcs/action.c \
+				./srcs/init.c \
 				./srcs/atoi.c \
 
 OBJS		=	$(SRCS:/%.c=%.o)

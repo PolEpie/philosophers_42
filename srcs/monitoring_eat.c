@@ -48,7 +48,7 @@ void	*monitor_eat(void *arg)
 	while (!is_all_ate(philo))
 	{
 		if ((now - start) % 50 == 0)
-			if (check_death(philo))
+			if (check_dead(philo))
 				return (NULL);
 		usleep(500);
 		now = timestamp();

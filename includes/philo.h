@@ -60,6 +60,7 @@ typedef struct s_philo
 	t_fork			**forks;
 	pthread_t		*tid;
 	pthread_mutex_t	write_mutex;
+	pthread_mutex_t	start_mutex;
 	pthread_mutex_t	eating_mutex;
 	pthread_mutex_t	game_over_mutex;
 	bool			game_over;

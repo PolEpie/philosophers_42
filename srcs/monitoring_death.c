@@ -28,15 +28,13 @@ static int	is_philosopher_dead(t_philo *philo_gen, t_philosopher *philosopher)
 {
 	long long current_time;
 	long long time_since_last_meal;
-	int status = 0;
+	int status;
 	
+	status = 0;
 	pthread_mutex_lock(&philo_gen->eating_mutex);
 	current_time = timestamp();
 	time_since_last_meal = current_time - philosopher->last_time_eat;
-	
-	// Check if philosopher has been waiting too long since last meal
-	// Give a small grace period by adding 10ms to the time_to_die
-	if (time_since_last_meal > philo_gen->time_to_die + 10 && !philosopher->is_eating)
+	if (time_since_last_meal > philo_gen->time_to_die && !philosopher->is_eating)
 	{
 		status = 1;
 	}
@@ -70,10 +68,8 @@ static int	is_a_philosopher_dead(t_philo *philo)
 void *death_monitor(void *arg)
 {
     t_philo *philo_gen = (t_philo *)arg;
-    
-    // Give philosophers time to start eating before checking for deaths
-    usleep(philo_gen->time_to_eat / 2);
-    
+	pthread_mutex_lock(&philo_gen->start_mutex);
+	pthread_mutex_unlock(&philo_gen->start_mutex);
     while (true)
     {
 		if (is_a_philosopher_dead(philo_gen))

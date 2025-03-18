@@ -43,6 +43,8 @@ void	*monitor_eat(void *arg)
 	long long	now;
 
 	philo = (t_philo *)arg;
+	pthread_mutex_lock(&philo->start_mutex);
+	pthread_mutex_unlock(&philo->start_mutex);
 	start = timestamp();
 	now = timestamp();
 	while (!is_all_ate(philo))

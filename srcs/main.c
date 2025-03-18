@@ -125,11 +125,13 @@ void	*philo_think(void *philo)
 
 	philosopher = (t_philosopher *)philo;
 	philo_gen = (t_philo *)philosopher->philo;
+	pthread_mutex_lock(&philo_gen->start_mutex);
+	pthread_mutex_unlock(&philo_gen->start_mutex);
 	if (philo_gen->number_of_philosophers == 1)
 	{
 		pthread_mutex_lock(&philosopher->left_fork->mutex);
 		print_philo(philosopher, "has taken a fork");
-		ft_usleep(philo_gen->time_to_die + 10, philo_gen);
+		ft_usleep(philo_gen->time_to_die, philo_gen);
 		pthread_mutex_unlock(&philosopher->left_fork->mutex);
 		return (NULL);
 	}
@@ -177,6 +179,43 @@ bool    create_mutex(t_philo *philo)
 	return (false);
 }
 
+static int	init_times(t_philo *philo)
+{
+	int		i;
+	size_t	time;
+
+	i = 0;	
+	time = timestamp();
+	philo->time_start = time;
+	while (i < philo->number_of_philosophers)
+	{
+		philo->philosophers[i].last_time_eat = time;
+		i++;
+	}
+	return (1);
+}
+
+void	destroy_threads(t_philo *philo, int count, t_fork **forks)
+{
+	int	i;
+
+	i = -1;
+	pthread_mutex_lock(&philo->game_over_mutex);
+	philo->game_over = true;
+	pthread_mutex_unlock(&philo->game_over_mutex);
+	while (++i < count)
+		pthread_join(philo->philosophers[i].thread, NULL);
+	i = 0;
+	while (i < philo->number_of_philosophers)
+	{
+		pthread_mutex_destroy(&forks[i]->mutex);
+		free(forks[i]);
+		i++;
+	}
+	free(forks);
+	free(philo->tid);
+}
+
 int	create_philosophers(t_philo *philo)
 {
 	t_philosopher	*philosophers;
@@ -200,6 +239,8 @@ int	create_philosophers(t_philo *philo)
 	pthread_mutex_init(&philo->write_mutex, NULL);
 	pthread_mutex_init(&philo->eating_mutex, NULL);
 	pthread_mutex_init(&philo->game_over_mutex, NULL);
+	pthread_mutex_init(&philo->start_mutex, NULL);
+	pthread_mutex_lock(&philo->start_mutex);
 	while (i < philo->number_of_philosophers)
 	{
 		philosophers[i].time_think = (philo->time_to_eat * ((philo->number_of_philosophers % 2) + 1)) - philo->time_to_sleep;
@@ -208,7 +249,10 @@ int	create_philosophers(t_philo *philo)
 		philosophers[i].philo = philo;
 		philosophers[i].is_eating = false;
 		philosophers[i].left_fork = forks[i];
-		philosophers[i].right_fork = forks[i == 0 ? philo->number_of_philosophers - 1 : i - 1];
+		if (i == 0)
+			philosophers[i].right_fork = forks[philo->number_of_philosophers - 1];
+		else
+			philosophers[i].right_fork = forks[i - 1];
 		philosophers[i].last_time_eat = time;
 		i++;
 	}
@@ -228,24 +272,15 @@ int	create_philosophers(t_philo *philo)
 		if (pthread_create(&eat_monitor_thread, NULL, monitor_eat, philo))
 			return (printf("Error creating eat monitor thread\n"), 1);
 	}
-	i = 0;
-	while (i < philo->number_of_philosophers)
-	{
-		pthread_join(philo->tid[i], NULL);
-		i++;
-	}
+	usleep(100 * philo->number_of_philosophers);
+	init_times(philo);
+	pthread_mutex_unlock(&philo->start_mutex);
+	while (!check_dead(philo))
+		usleep(500);
 	pthread_join(death_monitor_thread, NULL);
 	if (philo->number_of_times_each_philosopher_must_eat != -1)
 		pthread_join(eat_monitor_thread, NULL);
-	i = 0;
-	while (i < philo->number_of_philosophers)
-	{
-		pthread_mutex_destroy(&forks[i]->mutex);
-		free(forks[i]);
-		i++;
-	}
-	free(forks);
-	free(philo->tid);
+	destroy_threads(philo, philo->number_of_philosophers, forks);
 	return (0);
 }
 
@@ -290,6 +325,7 @@ int	main(int argc, char **argv)
 	pthread_mutex_destroy(&philo->write_mutex);
 	pthread_mutex_destroy(&philo->eating_mutex);
 	pthread_mutex_destroy(&philo->game_over_mutex);
+	pthread_mutex_destroy(&philo->start_mutex);
 	free(philo);
 	return (0);
 }
